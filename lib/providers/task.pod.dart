@@ -13,7 +13,15 @@ class TaskListNotifier extends _$TaskListNotifier {
   FutureOr<List<TaskDto>> build() async {
     final currentList = await Supabase.instance.client.rest
         .from(Consts.tableTasks)
-        .select<PostgrestList>();
+        .select<PostgrestList>()
+        .eq(
+          Consts.tableTasksColumnIsComplete,
+          false,
+        )
+        .order(
+          Consts.tableTasksColumnPriority,
+          ascending: false,
+        );
 
     final parsedData = currentList.map((e) => TaskDto.fromJson(e)).toList();
 
@@ -26,6 +34,36 @@ class TaskListNotifier extends _$TaskListNotifier {
         {
           Consts.tableTasksColumnData: task.data,
         },
+      );
+      ref.invalidateSelf();
+      return true;
+    } catch (e, s) {
+      Consts.logger.e(this, e, s);
+      return false;
+    }
+  }
+
+  Future<IsOperationSuccess> deleteTask(String taskId) async {
+    try {
+      await Supabase.instance.client.rest.from(Consts.tableTasks).delete().eq(
+            Consts.tableTasksColumnId,
+            taskId,
+          );
+      ref.invalidateSelf();
+      return true;
+    } catch (e, s) {
+      Consts.logger.e(this, e, s);
+      return false;
+    }
+  }
+
+  Future<IsOperationSuccess> completeTask(String taskId) async {
+    try {
+      await Supabase.instance.client.rest.from(Consts.tableTasks).update({
+        Consts.tableTasksColumnIsComplete: true,
+      }).eq(
+        Consts.tableTasksColumnId,
+        taskId,
       );
       ref.invalidateSelf();
       return true;

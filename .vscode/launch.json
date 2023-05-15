@@ -7,19 +7,28 @@
         {
             "name": "intellitask",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "args": [
+                "--enable-impeller"
+            ],
         },
         {
             "name": "intellitask (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": [
+                "--enable-impeller"
+            ],
         },
         {
             "name": "intellitask (release mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "args": [
+                "--enable-impeller"
+            ],
         }
     ]
 }

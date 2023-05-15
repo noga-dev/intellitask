@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
 abstract class Consts {
@@ -9,5 +10,12 @@ abstract class Consts {
   static final logger = Logger();
 
   static const tableTasks = 'tasks';
+  static const tableTasksColumnId = 'id';
   static const tableTasksColumnData = 'data';
+  static const tableTasksColumnPriority = 'priority';
+  static const tableTasksColumnIsComplete = 'is_complete';
+  static const tableTasksColumnIsCreatedAt = 'created_at';
+
+  static const defaultAnimationDuration = Duration(milliseconds: 600);
+  static const defaultAnimationCurve = Curves.easeInOut;
 }

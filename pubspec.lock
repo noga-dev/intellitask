@@ -25,6 +25,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.11.2"
+  animated_list_plus:
+    dependency: "direct main"
+    description:
+      name: animated_list_plus
+      sha256: f276e3c42a78a76c295186c4723e206dee7660741bd4e9592f9c5530511b7589
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   app_links:
     dependency: transitive
     description:
@@ -57,6 +65,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
+  bot_toast:
+    dependency: "direct main"
+    description:
+      name: bot_toast
+      sha256: "19306147033316a7873c5d261b874fca3f341c05e4e1c12be56153ad11187edd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.3"
   build:
     dependency: transitive
     description:
@@ -1111,4 +1127,4 @@ packages:
     version: "1.0.4"
 sdks:
   dart: ">=3.0.0 <4.0.0"
-  flutter: ">=3.3.0"
+  flutter: ">=3.7.0"
