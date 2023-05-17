@@ -9,6 +9,9 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intellitask/core/consts.dart';
 import 'package:intellitask/models/task.dto.dart';
 import 'package:intellitask/providers/task.pod.dart';
+import 'package:scroll_to_index/scroll_to_index.dart';
+
+const _kOffset = 80.0;
 
 class IntelliTaskApp extends ConsumerWidget {
   const IntelliTaskApp({super.key});
@@ -34,8 +37,10 @@ class _HomeScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final taskListPod = ref.watch(taskListNotifierProvider);
-    final showTextBox = useState(false);
+    final autoScrollController = useMemoized(() => AutoScrollController());
     final textController = useTextEditingController();
+    final prevTaskListVal = usePrevious(taskListPod);
+    final isTextboxVisible = useState(false);
     final onSubmit = useCallback(
       () async {
         if (textController.text.isEmpty) {
@@ -70,53 +75,87 @@ class _HomeScreen extends HookConsumerWidget {
       [textController.text],
     );
 
+    useEffect(() {
+      if (taskListPod.value != prevTaskListVal?.value &&
+          (taskListPod.value?.length ?? 0) >
+              (prevTaskListVal?.value?.length ?? 0)) {
+        final newList = taskListPod.value ?? [];
+        final item = newList.reduce((e1, e2) =>
+            e1.createdAt.difference(e2.createdAt) > Duration.zero ? e1 : e2);
+
+        autoScrollController.scrollToIndex(
+          taskListPod.value!.indexOf(item),
+          duration: Consts.defaultAnimationDuration,
+          preferPosition: AutoScrollPosition.begin,
+        );
+      }
+
+      return null;
+    }, [taskListPod.value]);
+
     return Scaffold(
       body: Stack(
         children: [
-          ImplicitlyAnimatedList<TaskDto>(
-            items: taskListPod.valueOrNull ?? [],
-            areItemsTheSame: (oldItem, newItem) => oldItem.id == newItem.id,
-            itemBuilder: (context, anim, item, index) => SizeTransition(
-              sizeFactor: anim,
-              child: _TaskCard(task: item),
-            ),
-            removeItemBuilder: (context, anim, oldItem) => SizeTransition(
-              sizeFactor: anim,
-              child: _TaskCard(task: oldItem),
+          AnimatedPositioned(
+            duration: Consts.defaultAnimationDuration,
+            bottom: isTextboxVisible.value ? _kOffset : 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            child: ImplicitlyAnimatedList<TaskDto>(
+              controller: autoScrollController,
+              items: prevTaskListVal?.value ?? [],
+              areItemsTheSame: (oldItem, newItem) => oldItem.id == newItem.id,
+              itemBuilder: (context, anim, item, index) {
+                return FadeTransition(
+                  opacity: anim,
+                  child: AutoScrollTag(
+                    controller: autoScrollController,
+                    key: ValueKey(index),
+                    index: index,
+                    child: _TaskCard(task: item),
+                  ),
+                );
+              },
             ),
           ),
           AnimatedPositioned(
             curve: Consts.defaultAnimationCurve,
             duration: Consts.defaultAnimationDuration,
-            bottom: showTextBox.value ? 0 : -200,
+            bottom: isTextboxVisible.value ? 0 : -_kOffset,
             left: 0,
             right: 0,
-            child: ColoredBox(
-              color: Theme.of(context).scaffoldBackgroundColor.withOpacity(.94),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: TextField(
-                  controller: textController,
-                  autofocus: true,
-                  onSubmitted: (value) => onSubmit(),
-                  decoration: InputDecoration(
-                    fillColor: Colors.transparent,
-                    focusColor: Colors.transparent,
-                    hoverColor: Colors.transparent,
-                    filled: true,
-                    border: const OutlineInputBorder(),
-                    suffixIcon: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: IconButton(
-                        onPressed: () => showTextBox.value = !showTextBox.value,
-                        icon: const Icon(Icons.close),
+            child: FocusScope(
+              canRequestFocus: isTextboxVisible.value,
+              child: ColoredBox(
+                color:
+                    Theme.of(context).scaffoldBackgroundColor.withOpacity(.94),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: textController,
+                    autofocus: true,
+                    onSubmitted: (value) => onSubmit(),
+                    decoration: InputDecoration(
+                      fillColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      filled: true,
+                      border: const OutlineInputBorder(),
+                      suffixIcon: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: IconButton(
+                          onPressed: () =>
+                              isTextboxVisible.value = !isTextboxVisible.value,
+                          icon: const Icon(Icons.close),
+                        ),
                       ),
-                    ),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: IconButton(
-                        onPressed: () => onSubmit(),
-                        icon: const Icon(Icons.add),
+                      prefixIcon: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: IconButton(
+                          onPressed: () => onSubmit(),
+                          icon: const Icon(Icons.add),
+                        ),
                       ),
                     ),
                   ),
@@ -127,11 +166,15 @@ class _HomeScreen extends HookConsumerWidget {
           AnimatedPositioned(
             curve: Consts.defaultAnimationCurve,
             duration: Consts.defaultAnimationDuration,
-            bottom: showTextBox.value ? -200 : 20,
+            bottom: isTextboxVisible.value ? -_kOffset : 20,
             right: 20,
-            child: FloatingActionButton(
-              onPressed: () => showTextBox.value = !showTextBox.value,
-              child: const Icon(Icons.add),
+            child: FocusScope(
+              canRequestFocus: !isTextboxVisible.value,
+              child: FloatingActionButton(
+                onPressed: () =>
+                    isTextboxVisible.value = !isTextboxVisible.value,
+                child: const Icon(Icons.add),
+              ),
             ),
           ),
         ],
