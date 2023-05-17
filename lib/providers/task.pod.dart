@@ -11,21 +11,43 @@ typedef IsOperationSuccess = bool;
 class TaskListNotifier extends _$TaskListNotifier {
   @override
   FutureOr<List<TaskDto>> build() async {
-    final currentList = await Supabase.instance.client.rest
-        .from(Consts.tableTasks)
-        .select<PostgrestList>()
-        .eq(
-          Consts.tableTasksColumnIsComplete,
-          false,
-        )
-        .order(
-          Consts.tableTasksColumnPriority,
-          ascending: false,
-        );
+    Supabase.instance.client
+        .from('tasks')
+        .stream(primaryKey: ['id'])
+        .order('priority', ascending: false)
+        .listen((event) {
+          // Logger().wtf(event);
+          state =
+              AsyncValue.data(event.map((e) => TaskDto.fromJson(e)).toList());
+        });
+    return [];
+    // Supabase.instance.client.realtime.channel('public:tasks').on(
+    //   RealtimeListenTypes.postgresChanges,
+    //   ChannelFilter(
+    //     event: 'INSERT',
+    //     schema: 'public',
+    //     table: 'tasks',
+    //   ),
+    //   (payload, [supaRef]) {
+    //     Logger().wtf(payload);
+    //   },
+    // ).subscribe();
 
-    final parsedData = currentList.map((e) => TaskDto.fromJson(e)).toList();
+    // final currentList = await Supabase.instance.client.rest
+    //     .from(Consts.tableTasks)
+    //     .select<PostgrestList>()
+    //     .eq(
+    //       Consts.tableTasksColumnIsComplete,
+    //       false,
+    //     )
+    //     .order(
+    //       Consts.tableTasksColumnPriority,
+    //       ascending: false,
+    //     );
 
-    return parsedData;
+    // final parsedData = currentList.map((e) => TaskDto.fromJson(e)).toList();
+
+    // return parsedData;
   }
 
   Future<IsOperationSuccess> addTask(TaskDto task) async {
@@ -35,7 +57,7 @@ class TaskListNotifier extends _$TaskListNotifier {
           Consts.tableTasksColumnData: task.data,
         },
       );
-      ref.invalidateSelf();
+      // ref.invalidateSelf();
       return true;
     } catch (e, s) {
       Consts.logger.e(this, e, s);
@@ -65,7 +87,7 @@ class TaskListNotifier extends _$TaskListNotifier {
         Consts.tableTasksColumnId,
         taskId,
       );
-      ref.invalidateSelf();
+      // ref.invalidateSelf();
       return true;
     } catch (e, s) {
       Consts.logger.e(this, e, s);
