@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:intellitask/core/consts.dart';
 import 'package:intellitask/models/task.dto.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -7,57 +9,43 @@ part 'task.pod.g.dart';
 
 typedef IsOperationSuccess = bool;
 
-@riverpod
+@Riverpod(dependencies: [])
+Stream<Iterable<TaskDto>> _taskListStream(_TaskListStreamRef ref) async* {
+  final result = Supabase.instance.client
+      .from(Consts.tblTasks)
+      .stream(primaryKey: [Consts.tblTasksColId])
+      .eq(
+        Consts.tblTasksColIsComplete,
+        false,
+      )
+      .order(
+        Consts.tblTasksColPriority,
+        ascending: false,
+      );
+
+  await for (final event in result) {
+    yield event.map((e) => TaskDto.fromJson(e));
+  }
+}
+
+@Riverpod(dependencies: [_taskListStream])
 class TaskListNotifier extends _$TaskListNotifier {
   @override
   FutureOr<List<TaskDto>> build() async {
-    Supabase.instance.client
-        .from('tasks')
-        .stream(primaryKey: ['id'])
-        .order('priority', ascending: false)
-        .listen((event) {
-          // Logger().wtf(event);
-          state =
-              AsyncValue.data(event.map((e) => TaskDto.fromJson(e)).toList());
-        });
-    return [];
-    // Supabase.instance.client.realtime.channel('public:tasks').on(
-    //   RealtimeListenTypes.postgresChanges,
-    //   ChannelFilter(
-    //     event: 'INSERT',
-    //     schema: 'public',
-    //     table: 'tasks',
-    //   ),
-    //   (payload, [supaRef]) {
-    //     Logger().wtf(payload);
-    //   },
-    // ).subscribe();
+    state = const AsyncLoading();
 
-    // final currentList = await Supabase.instance.client.rest
-    //     .from(Consts.tableTasks)
-    //     .select<PostgrestList>()
-    //     .eq(
-    //       Consts.tableTasksColumnIsComplete,
-    //       false,
-    //     )
-    //     .order(
-    //       Consts.tableTasksColumnPriority,
-    //       ascending: false,
-    //     );
+    final data = await ref.watch(_taskListStreamProvider.future);
 
-    // final parsedData = currentList.map((e) => TaskDto.fromJson(e)).toList();
-
-    // return parsedData;
+    return data.toList();
   }
 
-  Future<IsOperationSuccess> addTask(TaskDto task) async {
+  Future<IsOperationSuccess> addTask(String task) async {
     try {
-      await Supabase.instance.client.rest.from(Consts.tableTasks).insert(
+      await Supabase.instance.client.rest.from(Consts.tblTasks).insert(
         {
-          Consts.tableTasksColumnData: task.data,
+          Consts.tblTasksColData: task,
         },
       );
-      // ref.invalidateSelf();
       return true;
     } catch (e, s) {
       Consts.logger.e(this, e, s);
@@ -67,11 +55,10 @@ class TaskListNotifier extends _$TaskListNotifier {
 
   Future<IsOperationSuccess> deleteTask(String taskId) async {
     try {
-      await Supabase.instance.client.rest.from(Consts.tableTasks).delete().eq(
-            Consts.tableTasksColumnId,
+      await Supabase.instance.client.rest.from(Consts.tblTasks).delete().eq(
+            Consts.tblTasksColId,
             taskId,
           );
-      ref.invalidateSelf();
       return true;
     } catch (e, s) {
       Consts.logger.e(this, e, s);
@@ -81,13 +68,12 @@ class TaskListNotifier extends _$TaskListNotifier {
 
   Future<IsOperationSuccess> completeTask(String taskId) async {
     try {
-      await Supabase.instance.client.rest.from(Consts.tableTasks).update({
-        Consts.tableTasksColumnIsComplete: true,
+      await Supabase.instance.client.rest.from(Consts.tblTasks).update({
+        Consts.tblTasksColIsComplete: true,
       }).eq(
-        Consts.tableTasksColumnId,
+        Consts.tblTasksColId,
         taskId,
       );
-      // ref.invalidateSelf();
       return true;
     } catch (e, s) {
       Consts.logger.e(this, e, s);

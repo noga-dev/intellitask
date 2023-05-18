@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:logger/logger.dart';
 
-abstract class Consts {
+class Consts {
+  const Consts._();
   static const appName = 'IntelliTask';
 
   static const supabaseAnonKey =
@@ -9,13 +10,14 @@ abstract class Consts {
   static const supabaseUrl = 'https://vobmagvouahifxtwklqo.supabase.co';
   static final logger = Logger();
 
-  static const tableTasks = 'tasks';
-  static const tableTasksColumnId = 'id';
-  static const tableTasksColumnData = 'data';
-  static const tableTasksColumnPriority = 'priority';
-  static const tableTasksColumnIsComplete = 'is_complete';
-  static const tableTasksColumnIsCreatedAt = 'created_at';
+  static const tblTasks = 'tasks';
+  static const tblTasksColId = 'id';
+  static const tblTasksColData = 'data';
+  static const tblTasksColPriority = 'priority';
+  static const tblTasksColIsComplete = 'is_complete';
+  static const tblTasksColCreatedAt = 'created_at';
 
   static const defaultAnimationDuration = Duration(milliseconds: 600);
+  static const defaultAnimationDurationHalf = Duration(milliseconds: 300);
   static const defaultAnimationCurve = Curves.easeInOut;
 }
