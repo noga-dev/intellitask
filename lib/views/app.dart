@@ -21,7 +21,16 @@ class IntelliTaskApp extends ConsumerWidget {
     return MaterialApp(
       title: Consts.appName,
       debugShowCheckedModeBanner: false,
-      theme: ThemeData.dark(useMaterial3: true),
+      theme: ThemeData.dark(useMaterial3: true).copyWith(
+        scaffoldBackgroundColor: const Color(0xFF0c111a),
+        cardColor: const Color(0xFF121821),
+        cardTheme: CardTheme(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ),
+      ),
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: PointerDeviceKind.values.toSet(),
       ),
@@ -37,10 +46,9 @@ class _HomeScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, ref) {
     final taskListPod = ref.watch(taskListNotifierProvider);
-    final listKey = useMemoized(() => GlobalKey<AnimatedListState>());
     final autoScrollController = useMemoized(() => AutoScrollController());
     final animController = useAnimationController(
-      duration: Consts.defaultAnimationDuration * 2,
+      duration: Consts.defaultAnimationDuration * 4,
     );
     final textController = useTextEditingController();
     final prevTaskListVal = usePrevious(taskListPod);
@@ -69,6 +77,7 @@ class _HomeScreen extends HookConsumerWidget {
             hideCloseButton: true,
           );
         }
+        isTextboxVisible.value = false;
       },
       [textController.text],
     );
@@ -128,15 +137,30 @@ class _HomeScreen extends HookConsumerWidget {
             top: 0,
             left: 0,
             right: 0,
+            // would be better to  use a listview builder here for performance
+            // but calculating the scroll position for the gradient is a pita
             child: ListView.builder(
-              key: listKey,
               controller: autoScrollController,
               itemCount: taskListPod.value?.length ?? 0,
-              itemBuilder: (context, index) {
-                return ScaleTransition(
-                  scale: Tween(
-                    begin: 0.0,
-                    end: 1.0,
+              padding: const EdgeInsets.symmetric(vertical: _kOffset),
+              itemBuilder: (context, index) => ScaleTransition(
+                scale: Tween(
+                  begin: 0.24,
+                  end: 1.0,
+                ).animate(
+                  CurvedAnimation(
+                    parent: animController,
+                    curve: Interval(
+                      0.0,
+                      index / (taskListPod.value!.length),
+                      curve: Curves.elasticIn,
+                    ),
+                  ),
+                ),
+                child: SlideTransition(
+                  position: Tween(
+                    begin: const Offset(2, 0),
+                    end: const Offset(0, 0),
                   ).animate(
                     CurvedAnimation(
                       parent: animController,
@@ -147,33 +171,18 @@ class _HomeScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
-                  child: SlideTransition(
-                    position: Tween(
-                      begin: const Offset(2, 0),
-                      end: const Offset(0, 0),
-                    ).animate(
-                      CurvedAnimation(
-                        parent: animController,
-                        curve: Interval(
-                          0.0,
-                          index / (taskListPod.value!.length),
-                          curve: Curves.elasticIn,
-                        ),
-                      ),
-                    ),
-                    child: AutoScrollTag(
-                      controller: autoScrollController,
-                      key: ValueKey(taskListPod.value![index].id),
+                  child: AutoScrollTag(
+                    controller: autoScrollController,
+                    key: ValueKey(taskListPod.value![index].id),
+                    index: index,
+                    highlightColor: Colors.amber.withOpacity(.5),
+                    child: _TaskCard(
+                      task: taskListPod.value![index],
                       index: index,
-                      highlightColor: Colors.amber.withOpacity(.5),
-                      child: _TaskCard(
-                        task: taskListPod.value![index],
-                        index: index,
-                      ),
                     ),
                   ),
-                );
-              },
+                ),
+              ),
             ),
           ),
           AnimatedPositioned(
@@ -277,65 +286,88 @@ class _TaskCard extends HookConsumerWidget {
           ),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Card(
-            margin: EdgeInsets.zero,
-            color: Colors.purple.shade900,
-            child: Dismissible(
-              key: UniqueKey(),
-              onDismissed: (direction) {},
-              movementDuration: Consts.defaultAnimationDuration * 4,
-              resizeDuration: Consts.defaultAnimationDuration * 4,
-              confirmDismiss: (direction) async {
-                animController.reverse(from: 1);
-                if (direction == DismissDirection.startToEnd) {
-                  await ref
-                      .read(
-                        taskListNotifierProvider.notifier,
-                      )
-                      .deleteTask(task.id);
-                } else if (direction == DismissDirection.endToStart) {
-                  await ref
-                      .read(
-                        taskListNotifierProvider.notifier,
-                      )
-                      .completeTask(task.id);
-                }
-                return Future.value(false);
-              },
-              background: const ColoredBox(
-                color: Color.fromARGB(210, 134, 0, 0),
-                child: Row(
-                  children: [
-                    SizedBox(width: 10),
-                    Icon(Icons.delete),
-                    SizedBox(width: 10),
-                    Text(
-                      'delete',
-                      textScaleFactor: 1.4,
-                    ),
-                  ],
-                ),
+          padding:
+              const EdgeInsets.symmetric(vertical: 6, horizontal: _kOffset),
+          child: Center(
+            child: Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
-              secondaryBackground: const ColoredBox(
-                color: Color.fromARGB(255, 0, 148, 62),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    Text(
-                      'complete',
-                      textScaleFactor: 1.4,
+              child: ClipRRect(
+                child: Dismissible(
+                  key: UniqueKey(),
+                  onDismissed: (direction) {},
+                  movementDuration: Consts.defaultAnimationDuration * 4,
+                  resizeDuration: Consts.defaultAnimationDuration * 4,
+                  confirmDismiss: (direction) async {
+                    animController.reverse(from: 1);
+                    if (direction == DismissDirection.startToEnd) {
+                      await ref
+                          .read(
+                            taskListNotifierProvider.notifier,
+                          )
+                          .deleteTask(task.id);
+                    } else if (direction == DismissDirection.endToStart) {
+                      await ref
+                          .read(
+                            taskListNotifierProvider.notifier,
+                          )
+                          .completeTask(task.id);
+                    }
+                    return Future.value(false);
+                  },
+                  background: Card(
+                    margin: EdgeInsets.zero,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
                     ),
-                    SizedBox(width: 10),
-                    Icon(Icons.check),
-                    SizedBox(width: 10),
-                  ],
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  title: Text(task.data),
+                    child: const ColoredBox(
+                      color: Colors.red,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          SizedBox(width: 10),
+                          Icon(Icons.delete),
+                          SizedBox(width: 10),
+                          Text(
+                            'delete',
+                            textScaleFactor: 1.4,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  secondaryBackground: const ColoredBox(
+                    color: Colors.green,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          'complete',
+                          textScaleFactor: 1.4,
+                        ),
+                        SizedBox(width: 10),
+                        Icon(Icons.check),
+                        SizedBox(width: 10),
+                      ],
+                    ),
+                  ),
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.flag,
+                          color: _getCardColor(task.priority),
+                        ),
+                        title: Text(
+                          task.data,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -345,15 +377,16 @@ class _TaskCard extends HookConsumerWidget {
     );
   }
 
-  SizeTransition _builder(Animation<double> animation) {
-    return SizeTransition(
-      sizeFactor: animation,
-      child: IgnorePointer(
-        child: _TaskCard(
-          index: -1,
-          task: TaskDto.empty(),
-        ),
-      ),
-    );
+  Color _getCardColor(int value) {
+    double fraction = value / 32000.0;
+
+    // Calculate the red, green, and blue components of the color.
+    double red = 1.0 - fraction;
+    double green = fraction;
+    double blue = 0.0;
+
+    // Create a new Color object with the calculated components.
+    return Color.fromARGB(
+        255, (red * 255).toInt(), (green * 255).toInt(), (blue * 255).toInt());
   }
 }

@@ -49,3 +49,4 @@ lib/core/env.dart
 **.g.dart
 **.freezed.dart
 .fvm/flutter_sdk
+**/node_modules/**
