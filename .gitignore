@@ -50,3 +50,4 @@ lib/core/env.dart
 **.freezed.dart
 .fvm/flutter_sdk
 **/node_modules/**
+**.env.local

@@ -16,6 +16,7 @@ class Consts {
   static const tblTasksColPriority = 'priority';
   static const tblTasksColIsComplete = 'is_complete';
   static const tblTasksColCreatedAt = 'created_at';
+  static const tblTasksColIsValid = 'is_valid';
 
   static const defaultAnimationDuration = Duration(milliseconds: 600);
   static const defaultAnimationDurationHalf = Duration(milliseconds: 300);
