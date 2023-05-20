@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:intellitask/core/consts.dart';
 import 'package:intellitask/models/task.dto.dart';
@@ -45,7 +44,6 @@ class TaskListNotifier extends _$TaskListNotifier {
       await Supabase.instance.client.rest.from(Consts.tblTasks).insert(
         {
           Consts.tblTasksColData: task,
-          Consts.tblTasksColPriority: Random().nextInt(32000),
         },
       );
       return true;

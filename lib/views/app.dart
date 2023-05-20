@@ -358,7 +358,7 @@ class _TaskCard extends HookConsumerWidget {
                       child: ListTile(
                         leading: Icon(
                           Icons.flag,
-                          color: _getCardColor(task.priority),
+                          color: _getPriorityColor(task.priority),
                         ),
                         title: Text(
                           task.data,
@@ -377,7 +377,11 @@ class _TaskCard extends HookConsumerWidget {
     );
   }
 
-  Color _getCardColor(int value) {
+  Color _getPriorityColor(int value) {
+    if (value == 0) {
+      return Colors.grey;
+    }
+
     double fraction = value / 32000.0;
 
     // Calculate the red, green, and blue components of the color.
