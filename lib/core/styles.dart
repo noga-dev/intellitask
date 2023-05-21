@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:intellitask/gen/fonts.gen.dart';
 
+final appTheme = ThemeData.dark(useMaterial3: true).copyWith(
+  scaffoldBackgroundColor: AppColors.scaffoldBackgroundColor,
+  cardTheme: _cardTheme,
+  textTheme: _textTheme,
+  progressIndicatorTheme: _progressIndicatorTheme,
+);
+
 const _fontFamily = FontFamily.poppins;
+
 const _textStyle = TextStyle(
+  color: Colors.white,
   fontFamily: _fontFamily,
   decoration: TextDecoration.none,
 );
@@ -31,10 +40,8 @@ const _cardTheme = CardTheme(
   ),
 );
 
-final appTheme = ThemeData.dark(useMaterial3: true).copyWith(
-  scaffoldBackgroundColor: AppColors.scaffoldBackgroundColor,
-  cardTheme: _cardTheme,
-  textTheme: _textTheme,
+const _progressIndicatorTheme = ProgressIndicatorThemeData(
+  color: AppColors.loadingIndicatorColor,
 );
 
 abstract class AppPaddings {
@@ -42,9 +49,11 @@ abstract class AppPaddings {
 }
 
 abstract class AppColors {
-  static const primaryColor = Color(0xFF254A59);
+  static const primaryColor = Color(0xFFE5006A);
   static const secondaryColor = Color(0xFF142F40);
   static const accentColor = Color(0xFF0A1926);
+
+  static const loadingIndicatorColor = Color(0xFFE5006A);
 
   static const scaffoldBackgroundColor = Color(0xFF0D0D0D);
   static const cardBackgroundColor = secondaryColor;

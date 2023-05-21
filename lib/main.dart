@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intellitask/core/consts.dart';
 import 'package:intellitask/core/env.dart';
+import 'package:intellitask/core/styles.dart';
 import 'package:intellitask/views/app.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -21,7 +22,9 @@ void main() async {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: CircularProgressIndicator.adaptive(),
+            child: CircularProgressIndicator.adaptive(
+              backgroundColor: AppColors.primaryColor,
+            ),
           ),
         ),
       ),
@@ -134,11 +137,12 @@ Future<void> _init() async {
       // ignore: missing_provider_scope
       runApp(
         const Material(
-          color: Colors.black,
           child: Directionality(
             textDirection: TextDirection.ltr,
             child: Center(
-              child: Text('Error signing in'),
+              child: Text(
+                'Error signing in',
+              ),
             ),
           ),
         ),
