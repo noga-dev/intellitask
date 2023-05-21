@@ -43,6 +43,13 @@ Then I tried dart edge functions to use with openai -- but it's too experimental
 
 Ultimately had to resort to using vanilla Edge functions with Deno and TS.
 
+### Suggestions
+
+Here's some suggestions or ideas for tasks to test out the app:
+* "take heart medicine in 2 hours" - will give it a red flag, and the deadline will be in 2 hours
+* "bake a cake for timmy's birthday by tomorrow" - will add a green flag since it's not that important, and will give it a deadline of within a day
+* "who's napolean?" - ai will say this is an invalid task and will delete it
+
 ### future features
-[ ] - Automatically add local notifications
-[ ] -  add related pics based on the context of the task?
+- [ ] Automatically add local notifications
+- [ ] Add related pics based on the context of the task?
