@@ -12,13 +12,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-      - uses: subosito/flutter-action@v2
       - uses: SpicyPizza/create-envfile@v1.3
         with:
           envkey_ANON_EMAIL_KEY: ${{ env.ANON_EMAIL_KEY }}
+      - uses: subosito/flutter-action@v2
       - run: flutter pub get
       - run: flutter pub run build_runner build --delete-conflicting-outputs
-      - run: flutter build web --release --base-href /
+      - run: flutter build web --release --base-href /intellitask/
       - run: git config user.name github-actions
       - run: git config user.email github-actions@github.com
       - run: git --work-tree build/web add --all
