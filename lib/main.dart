@@ -131,6 +131,18 @@ Future<void> _init() async {
         password: password,
       );
     } catch (_) {
+      // ignore: missing_provider_scope
+      runApp(
+        const Material(
+          color: Colors.black,
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Text('Error signing in'),
+            ),
+          ),
+        ),
+      );
       rethrow;
     }
   } catch (e, s) {
