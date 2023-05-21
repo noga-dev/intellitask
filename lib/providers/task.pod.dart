@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:bot_toast/bot_toast.dart';
+import 'package:flutter/material.dart';
 import 'package:intellitask/core/consts.dart';
 import 'package:intellitask/models/task.dto.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -20,7 +22,7 @@ Stream<Iterable<TaskDto>> _taskListStream(_TaskListStreamRef ref) async* {
       )
       .order(
         Consts.tblTasksColPriority,
-        ascending: true,
+        ascending: false,
       );
 
   await for (final event in result) {
@@ -36,7 +38,23 @@ class TaskListNotifier extends _$TaskListNotifier {
 
     final data = await ref.watch(_taskListStreamProvider.future);
 
-    return data.toList();
+    for (var element in data) {
+      if (!element.isValid) {
+        BotToast.showSimpleNotification(
+          title: 'The AI couldn\'t understand the task "${element.data}"',
+          align: Alignment.center,
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+          hideCloseButton: true,
+        );
+        await Supabase.instance.client.rest.from(Consts.tblTasks).delete().eq(
+              Consts.tblTasksColId,
+              element.id,
+            );
+      }
+    }
+
+    return [...data.toList()];
   }
 
   Future<IsOperationSuccess> addTask(String task) async {

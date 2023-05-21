@@ -12,6 +12,7 @@ class TaskDto with _$TaskDto {
     @JsonKey(name: Consts.tblTasksColPriority) required int priority,
     @JsonKey(name: Consts.tblTasksColIsComplete) required bool isComplete,
     @JsonKey(name: Consts.tblTasksColIsValid) required bool isValid,
+    @JsonKey(name: Consts.tblTasksColDueIn) required int dueIn,
     @JsonKey(name: Consts.tblTasksColCreatedAt) required DateTime createdAt,
   }) = _TaskDto;
 
@@ -22,6 +23,7 @@ class TaskDto with _$TaskDto {
         isComplete: false,
         createdAt: DateTime.now(),
         isValid: true,
+        dueIn: 0,
       );
 
   factory TaskDto.fromJson(Map<String, dynamic> json) =>
