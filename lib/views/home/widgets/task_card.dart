@@ -172,9 +172,7 @@ class TaskCard extends HookConsumerWidget {
       return Colors.grey;
     }
 
-    double percent = value / 32765.0;
-
-    return Color.lerp(Colors.green, Colors.red, percent) ?? Colors.grey;
+    return Color.lerp(Colors.green, Colors.red, value / 32765.0) ?? Colors.grey;
   }
 
   void _useInterval(VoidCallback callback, Duration delay) {
