@@ -45,7 +45,7 @@ app.*.map.json
 
 # project
 .env
-lib/core/env.dart
+lib/core/env.g.dart
 **.g.dart
 **.freezed.dart
 .fvm/flutter_sdk
