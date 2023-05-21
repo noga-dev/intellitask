@@ -39,7 +39,7 @@ Demo:
 
 ## Notes
 
-I originally wanted to use vertex ai - but it doesn't have vanilla api endpoints and supabase lacks the runtimes supported by Appwrite and Firebase (python in this case for which vertex ai has an official sdk).
+I originally wanted to use Vertex AI - but it doesn't have vanilla api endpoints and supabase lacks the runtimes supported by Appwrite and Firebase (python in this case for which Vertex AI has an official sdk).
 
 Then I tried dart edge functions to use with openai -- but it's too experimental to be useable as of yet.
 

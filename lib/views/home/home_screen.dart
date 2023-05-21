@@ -6,6 +6,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intellitask/core/consts.dart';
 import 'package:intellitask/core/styles.dart';
 import 'package:intellitask/providers/task.pod.dart';
+import 'package:intellitask/providers/theme.pod.dart';
 import 'package:intellitask/views/home/widgets/task_card.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 
@@ -14,8 +15,9 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final taskListPod = ref.watch(taskListNotifierProvider).valueOrNull ?? [];
-    final prevTaskListVal = usePrevious(taskListPod);
+    final taskListPod = ref.watch(taskListNotifierProvider);
+    final taskList = taskListPod.valueOrNull ?? [];
+    final prevTaskListVal = usePrevious(taskList);
     final autoScrollController = useMemoized(() => AutoScrollController(), []);
     final textController = useTextEditingController();
     final isTextboxVisible = useState(false);
@@ -70,17 +72,17 @@ class HomeScreen extends HookConsumerWidget {
 
     useEffect(() {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        if (taskListPod != prevTaskListVal &&
-            (taskListPod.length > (prevTaskListVal?.length ?? 0) ||
-                (taskListPod.any((element) => element.priority == 0)) !=
+        if (taskList != prevTaskListVal &&
+            (taskList.length > (prevTaskListVal?.length ?? 0) ||
+                (taskList.any((element) => element.priority == 0)) !=
                     (prevTaskListVal?.any((element) => element.priority == 0) ??
                         false))) {
-          final newList = taskListPod;
+          final newList = taskList;
           final item = newList.reduce((e1, e2) =>
               e1.createdAt.difference(e2.createdAt) > Duration.zero ? e1 : e2);
           animController.forward(from: 0.1);
 
-          final index = taskListPod.indexOf(item);
+          final index = taskList.indexOf(item);
 
           autoScrollController.scrollToIndex(
             index,
@@ -94,14 +96,18 @@ class HomeScreen extends HookConsumerWidget {
 
       return;
     }, [
-      taskListPod,
-      taskListPod.where((element) => element.priority == 0).isNotEmpty,
+      taskList,
+      taskList.where((element) => element.priority == 0).isNotEmpty,
     ]);
 
     return Scaffold(
       body: Stack(
         children: [
-          if (taskListPod.isEmpty)
+          if (taskListPod.isLoading)
+            const Center(
+              child: CircularProgressIndicator.adaptive(),
+            )
+          else if (taskList.isEmpty)
             const Center(
               child: Text(
                 'No tasks yet',
@@ -110,7 +116,7 @@ class HomeScreen extends HookConsumerWidget {
           else
             ListView.builder(
               controller: autoScrollController,
-              itemCount: taskListPod.length,
+              itemCount: taskList.length,
               padding: const EdgeInsets.symmetric(
                   vertical: AppPaddings.defaultOffset),
               itemBuilder: (context, index) => ScaleTransition(
@@ -122,7 +128,7 @@ class HomeScreen extends HookConsumerWidget {
                     parent: animController,
                     curve: Interval(
                       0.0,
-                      index / (taskListPod.length),
+                      index / (taskList.length),
                       curve: Curves.elasticIn,
                     ),
                   ),
@@ -136,18 +142,18 @@ class HomeScreen extends HookConsumerWidget {
                       parent: animController,
                       curve: Interval(
                         0.0,
-                        index / (taskListPod.length),
+                        index / (taskList.length),
                         curve: Curves.elasticIn,
                       ),
                     ),
                   ),
                   child: AutoScrollTag(
                     controller: autoScrollController,
-                    key: ValueKey(taskListPod[index].id),
+                    key: ValueKey(taskList[index].id),
                     index: index,
                     highlightColor: AppColors.highlightColor,
                     child: TaskCard(
-                      task: taskListPod[index],
+                      task: taskList[index],
                       index: index,
                     ),
                   ),
@@ -212,6 +218,37 @@ class HomeScreen extends HookConsumerWidget {
                 onPressed: () =>
                     isTextboxVisible.value = !isTextboxVisible.value,
                 child: const Icon(Icons.add),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            left: 0,
+            child: SizedBox.square(
+              dimension: 40,
+              child: InkResponse(
+                canRequestFocus: false,
+                onTap: () =>
+                    ref.read(themeNotifierProvider.notifier).toggleTheme(),
+                child: AnimatedSwitcher(
+                  duration: Consts.defaultAnimationDuration,
+                  transitionBuilder: (child, animation) => SlideTransition(
+                    position: Tween(
+                      begin: const Offset(-5, -5),
+                      end: const Offset(0, 0),
+                    ).animate(animation),
+                    child: child,
+                  ),
+                  child: ref.watch(themeNotifierProvider) == ThemeMode.light
+                      ? const Icon(
+                          key: ValueKey('light'),
+                          Icons.brightness_3_sharp,
+                        )
+                      : const Icon(
+                          key: ValueKey('dark'),
+                          Icons.brightness_5_sharp,
+                        ),
+                ),
               ),
             ),
           ),

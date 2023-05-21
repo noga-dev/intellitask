@@ -53,11 +53,8 @@ class TaskCard extends HookConsumerWidget {
           ),
           child: Center(
             child: Card(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: defaultBorderRadius,
                 child: Dismissible(
                   key: UniqueKey(),
                   onDismissed: (direction) {},
@@ -142,17 +139,18 @@ class TaskCard extends HookConsumerWidget {
                             );
 
                             return Text(
-                                timeago.format(
-                                  DateTime.now().add(
-                                    timeRemaining,
-                                  ),
-                                  allowFromNow: true,
+                              timeago.format(
+                                DateTime.now().add(
+                                  timeRemaining,
                                 ),
-                                style: TextStyle(
-                                  color: timeRemaining.inMinutes > 0
-                                      ? AppColors.success
-                                      : AppColors.error,
-                                ));
+                                allowFromNow: true,
+                              ),
+                              style: TextStyle(
+                                color: timeRemaining.inMinutes > 0
+                                    ? AppColors.success
+                                    : AppColors.error,
+                              ),
+                            );
                           }),
                         ),
                       ),
