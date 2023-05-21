@@ -4,7 +4,7 @@ A simple no-hassle TO-DO app.
 
 ## Description
 
-IntelliTask is an AI driven To-Do app. All you do is write the task and submit it. The AI sets the time priority (as seen by the color of the flag - the redder it is, the higher the priority of the task), and the due date and time which is cownted down from with at the bottom of the card.
+IntelliTask is an AI driven To-Do app. All you do is write the task and submit it. The AI sets the time priority (as seen by the color of the flag - the redder it is, the higher the priority of the task), and the due datetime for which there is a countdown at the bottom of the task's card.
 
 ### Inner workings explanation
 Since Supabase doesn't support anonymous authentication, we had to improvise and decide between:
