@@ -156,12 +156,12 @@ Future<void> _init() async {
 
 // https://github.com/BestBurning/platform_device_id/issues/21#issuecomment-1133934641
 Future<String> _getDeviceId() async {
-  String biosID = '';
-
   if (kIsWeb) {
     final clientInfo = await ClientInformation.fetch();
-    return clientInfo.deviceId;
+    return 'web${clientInfo.deviceId}';
   }
+
+  String biosID = '';
 
   final process = await Process.start(
     'wmic',
@@ -176,6 +176,20 @@ Future<String> _getDeviceId() async {
     if (item.isNotEmpty) {
       biosID = item;
     }
+  }
+
+  if (Platform.isAndroid) {
+    return 'and$biosID';
+  } else if (Platform.isFuchsia) {
+    return 'fhs$biosID';
+  } else if (Platform.isIOS) {
+    return 'ios$biosID';
+  } else if (Platform.isLinux) {
+    return 'lnx$biosID';
+  } else if (Platform.isMacOS) {
+    return 'mac$biosID';
+  } else if (Platform.isWindows) {
+    return 'win$biosID';
   }
 
   return biosID;

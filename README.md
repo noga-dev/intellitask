@@ -8,7 +8,7 @@ IntelliTask is an AI driven To-Do app. All you do is write the task and submit i
 
 ### Inner workings explanation
 Since Supabase doesn't support anonymous authentication, we had to improvise and decide between:
-   I. foregoing auth and allowing unauthed users to interact with the backend
+    I. foregoing auth and allowing unauthed users to interact with the backend
    II. go with the classic provider and/or phone/email w/ password signin
    III. set a simple device driven signup to spare the user from having to sign in manually.
 We went with III for quick-n-dirty convenient UX while preserving the good practice of having a proper user session.
@@ -16,9 +16,11 @@ We went with III for quick-n-dirty convenient UX while preserving the good pract
 On startup the app shows a simple material loading indicator while performing the signin/signup in the background using the machine UUID, then loads the home page.
 
 The homepage has an extremely simple UI with 3 elements:
+
     I. a list of tasks
-    II. a + button
+    II. a button
     III. a textfield
+    
 With the button and textfield appearing and disappearing depending on the state of the other. If the list is empty you are presented with an empty list and UI element indicating so. If the list is populated you'll be taken to the last last item and have it highlighted. 
 
 Since by default the + button has focus, pressing enter or space will make the text field for entering the task to appear with it immediatelly now having the focus.
