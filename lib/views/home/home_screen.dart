@@ -14,15 +14,15 @@ class HomeScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, ref) {
-    final taskListPod = ref.watch(taskListNotifierProvider);
+    final taskListPod = ref.watch(taskListNotifierProvider).valueOrNull ?? [];
     final prevTaskListVal = usePrevious(taskListPod);
-    final autoScrollController = useMemoized(() => AutoScrollController());
+    final autoScrollController = useMemoized(() => AutoScrollController(), []);
     final textController = useTextEditingController();
     final isTextboxVisible = useState(false);
     final textFocusNode = useFocusNode();
     final fabFocusNode = useFocusNode();
     final animController = useAnimationController(
-      duration: Consts.defaultAnimationDuration * 4,
+      duration: Consts.defaultAnimationDuration,
     );
     final onSubmit = useCallback(
       () async {
@@ -70,15 +70,17 @@ class HomeScreen extends HookConsumerWidget {
 
     useEffect(() {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-        if (taskListPod.value != prevTaskListVal?.value &&
-            (taskListPod.value?.length ?? 0) >
-                (prevTaskListVal?.value?.length ?? 0)) {
-          final newList = taskListPod.value ?? [];
+        if (taskListPod != prevTaskListVal &&
+            (taskListPod.length > (prevTaskListVal?.length ?? 0) ||
+                (taskListPod.any((element) => element.priority == 0)) !=
+                    (prevTaskListVal?.any((element) => element.priority == 0) ??
+                        false))) {
+          final newList = taskListPod;
           final item = newList.reduce((e1, e2) =>
               e1.createdAt.difference(e2.createdAt) > Duration.zero ? e1 : e2);
           animController.forward(from: 0.1);
 
-          final index = taskListPod.value!.indexOf(item);
+          final index = taskListPod.indexOf(item);
 
           autoScrollController.scrollToIndex(
             index,
@@ -91,57 +93,67 @@ class HomeScreen extends HookConsumerWidget {
       });
 
       return;
-    }, [taskListPod.value]);
+    }, [
+      taskListPod,
+      taskListPod.where((element) => element.priority == 0).isNotEmpty,
+    ]);
 
     return Scaffold(
       body: Stack(
         children: [
-          ListView.builder(
-            controller: autoScrollController,
-            itemCount: taskListPod.value?.length ?? 0,
-            padding:
-                const EdgeInsets.symmetric(vertical: AppPaddings.defaultOffset),
-            itemBuilder: (context, index) => ScaleTransition(
-              scale: Tween(
-                begin: 0.24,
-                end: 1.0,
-              ).animate(
-                CurvedAnimation(
-                  parent: animController,
-                  curve: Interval(
-                    0.0,
-                    index / (taskListPod.value!.length),
-                    curve: Curves.elasticIn,
-                  ),
-                ),
+          if (taskListPod.isEmpty)
+            const Center(
+              child: Text(
+                'No tasks yet',
               ),
-              child: SlideTransition(
-                position: Tween(
-                  begin: const Offset(2, 0),
-                  end: const Offset(0, 0),
+            )
+          else
+            ListView.builder(
+              controller: autoScrollController,
+              itemCount: taskListPod.length,
+              padding: const EdgeInsets.symmetric(
+                  vertical: AppPaddings.defaultOffset),
+              itemBuilder: (context, index) => ScaleTransition(
+                scale: Tween(
+                  begin: 0.24,
+                  end: 1.0,
                 ).animate(
                   CurvedAnimation(
                     parent: animController,
                     curve: Interval(
                       0.0,
-                      index / (taskListPod.value!.length),
+                      index / (taskListPod.length),
                       curve: Curves.elasticIn,
                     ),
                   ),
                 ),
-                child: AutoScrollTag(
-                  controller: autoScrollController,
-                  key: ValueKey(taskListPod.value![index].id),
-                  index: index,
-                  highlightColor: AppColors.highlightColor,
-                  child: TaskCard(
-                    task: taskListPod.value![index],
+                child: SlideTransition(
+                  position: Tween(
+                    begin: const Offset(2, 0),
+                    end: const Offset(0, 0),
+                  ).animate(
+                    CurvedAnimation(
+                      parent: animController,
+                      curve: Interval(
+                        0.0,
+                        index / (taskListPod.length),
+                        curve: Curves.elasticIn,
+                      ),
+                    ),
+                  ),
+                  child: AutoScrollTag(
+                    controller: autoScrollController,
+                    key: ValueKey(taskListPod[index].id),
                     index: index,
+                    highlightColor: AppColors.highlightColor,
+                    child: TaskCard(
+                      task: taskListPod[index],
+                      index: index,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           AnimatedPositioned(
             curve: Consts.defaultAnimationCurve,
             duration: Consts.defaultAnimationDuration,
