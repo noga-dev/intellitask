@@ -110,15 +110,15 @@ serve(async (_req) => {
         return new Response("Error: Invalid priority", { status: 400 });
       }
 
-      const parsedSeconds = parseInt(parsedContent[1]);
+      const parsedMinutes = parseInt(parsedContent[1]);
 
-      if (isNaN(parsedSeconds) || parsedSeconds < 1 || parsedSeconds > int4) {
+      if (isNaN(parsedMinutes) || parsedMinutes < 1 || parsedMinutes > int4) {
         const updateQuery = await connection.queryObject`UPDATE tasks SET is_valid = false WHERE id = ${parsedTask['id']}`
         console.log('updateQuery-------'+updateQuery);
         return new Response("Error: Invalid seconds", { status: 400 });
       }
 
-      const updateQuery = await connection.queryObject`UPDATE tasks SET priority = ${parsedPriority}, due_in = ${parsedSeconds} WHERE id = ${parsedTask['id']}`
+      const updateQuery = await connection.queryObject`UPDATE tasks SET priority = ${parsedPriority}, due_in = ${parsedMinutes} WHERE id = ${parsedTask['id']}`
 
       // Return the response with the correct content type header
       return new Response(JSON.stringify(updateQuery), {
