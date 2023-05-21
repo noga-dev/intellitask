@@ -3,6 +3,8 @@ name: Gh-Pages
 on:
   push:
     branches: [ master ]
+    paths-ignore:
+      - '**.md'
 
 jobs:
   build:
@@ -11,6 +13,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: subosito/flutter-action@v2
+      - uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_ANON_EMAIL_KEY: ${{ env.ANON_EMAIL_KEY }}
       - run: flutter pub get
       - run: flutter pub run build_runner build --delete-conflicting-outputs
       - run: flutter build web --release --base-href /

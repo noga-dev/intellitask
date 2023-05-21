@@ -1,5 +1,7 @@
 # IntelliTask
 
+A simple no-hassle TO-DO app.
+
 ## Description
 
 IntelliTask is an AI driven To-Do app. All you do is write the task and submit it. The AI sets the time priority (as seen by the color of the flag - the redder it is, the higher the priority of the task), and the due date and time which is cownted down from with at the bottom of the card.
@@ -24,6 +26,8 @@ Since by default the + button has focus, pressing enter or space will make the t
 When you're done writing the task, you may now press enter to have the task sent to the server where it is added to the tasks table and triggers an edge function to be sent and processed by an AI (in this case the OpenAI gpt-3.5-turbo model) and assigned a priority and a due date/time. All updates are updated in the app via Supabase realtime.
 
 If the task is deemed uncategorizeble by the AI, it renders it invalid, it's indicated as such in the app, and then gets deleted.
+
+Swiping left or right on the task card deletes or completes the task.
 
 For state management I resort to my default go-to of Riverpod+Hooks.
 
