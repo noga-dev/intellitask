@@ -78,7 +78,7 @@ final appThemeLight = ThemeData.light(useMaterial3: true).copyWith(
   colorScheme: _colorScheme,
 );
 
-const defaultBorderRadius = BorderRadius.all(Radius.circular(32));
+const defaultBorderRadius = BorderRadius.all(Radius.circular(40));
 
 const _fontFamily = FontFamily.poppins;
 
