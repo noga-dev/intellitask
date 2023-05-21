@@ -161,6 +161,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.0"
+  client_information:
+    dependency: "direct main"
+    description:
+      name: client_information
+      sha256: "14c7203f432f98c884209bef649de5ec862826e85f2d6019329c4b41c9db9d3d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.4"
   clock:
     dependency: transitive
     description:

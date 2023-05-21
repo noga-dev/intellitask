@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bot_toast/bot_toast.dart';
+import 'package:client_information/client_information.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:intellitask/core/consts.dart';
@@ -139,6 +141,11 @@ Future<void> _init() async {
 // https://github.com/BestBurning/platform_device_id/issues/21#issuecomment-1133934641
 Future<String> _getDeviceId() async {
   String biosID = '';
+
+  if (kIsWeb) {
+    final clientInfo = await ClientInformation.fetch();
+    return clientInfo.deviceId;
+  }
 
   final process = await Process.start(
     'wmic',
