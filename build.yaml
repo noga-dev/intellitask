@@ -1,9 +1,0 @@
-targets:
-  $default:
-    builders:
-      envied_generator|envied:
-        generate_for:
-          - lib/core/env.dart
-        options:
-          build_extensions:
-            '.dart': '.g.dart'
