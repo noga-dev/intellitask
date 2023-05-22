@@ -17,7 +17,7 @@ class HomeScreen extends HookConsumerWidget {
   Widget build(BuildContext context, ref) {
     final taskListPod = ref.watch(taskListNotifierProvider);
     final taskList = taskListPod.valueOrNull ?? [];
-    final prevTaskListVal = usePrevious(taskList);
+    final prevTaskListVal = usePrevious(taskList) ?? [];
     final autoScrollController = useMemoized(() => AutoScrollController(), []);
     final textController = useTextEditingController();
     final isTextboxVisible = useState(false);
@@ -73,10 +73,10 @@ class HomeScreen extends HookConsumerWidget {
     useEffect(() {
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         if (taskList != prevTaskListVal &&
-            (taskList.length > (prevTaskListVal?.length ?? 0) ||
+            (taskList.length > (prevTaskListVal.length) ||
                 (taskList.any((element) => element.priority == 0)) !=
-                    (prevTaskListVal?.any((element) => element.priority == 0) ??
-                        false))) {
+                    (prevTaskListVal
+                        .any((element) => element.priority == 0)))) {
           final newList = taskList;
           final item = newList.reduce((e1, e2) =>
               e1.createdAt.difference(e2.createdAt) > Duration.zero ? e1 : e2);
